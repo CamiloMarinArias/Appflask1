@@ -1,0 +1,93 @@
+ <!-- links para exportar a excel -->
+ <script src="https://unpkg.com/xlsx@0.16.9/dist/xlsx.full.min.js"></script>
+ <script src="https://unpkg.com/file-saverjs@latest/FileSaver.min.js"></script>
+ <script src="https://unpkg.com/tableexport@latest/dist/js/tableexport.min.js"></script>
+
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>   
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class="row">
+    <div class="col-md-5">
+        {% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+{%endfor%}
+{%endif%}
+{%endwith%}
+        <div class="card card-body">
+            <form action="/add_contact" method="POST">
+                <div class="form-group">
+                    <input type="text" name="nombrecompleto" placeholder="Nombre Completo" class="form-control" required="" pattern="[a-z A-Z]+">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="telefono" placeholder="Telefono" class="form-control" required="" pattern="[0-9]+" maxlength="9">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="mail" placeholder="Ejemplo@dominio.com" class="form-control" required="">
+                </div>
+                <div class="form-group">
+                    
+                    <button type="submit" class="form-control btn btn-primary btn-block">
+                        Guardar
+                    </button>
+                </div>                
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <table class="table table-striped table-bordered bg-white table-sm" id="tabla">
+            <thead>
+                <tr>
+                    <td>NombreCompleto</td>
+                    <td>Telefono</td>
+                    <td>Email</td>
+                    <td>Operaciones</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                <tr>
+                    <td>{{contact.1}}</td>
+                    <td>{{contact.2}}</td>
+                    <td>{{contact.3}}</td>
+                    <td>
+                        <a href="/edit/{{ contact.0 }}" class="btn btn-secondary">Editar</a>
+                        <a href="/delete/{{ contact.0 }}" class="btn btn-danger">Eliminar</a>
+                    </td>
+                </tr>           
+                {%endfor%}
+               
+            </tbody>
+        </table>
+        <button id="btnExportar" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Exportar datos a Excel
+        </button>
+
+        <!-- script para exportar a excel -->
+<script>
+    const $btnExportar = document.querySelector("#btnExportar"),
+        $tabla = document.querySelector("#tabla");
+
+    $btnExportar.addEventListener("click", function() {
+        let tableExport = new TableExport($tabla, {
+            exportButtons: false, 
+            filename: "Reporte De Personas", 
+            sheetname: "Reporte De Personal", 
+        });
+        let datos = tableExport.getExportData();
+        let preferenciasDocumento = datos.tabla.xlsx;
+        tableExport.export2file(preferenciasDocumento.data, preferenciasDocumento.mimeType, preferenciasDocumento.filename, preferenciasDocumento.fileExtension, preferenciasDocumento.merges, preferenciasDocumento.RTL, preferenciasDocumento.sheetname);
+    });
+</script>
+    </div>
+</div>
+{% endblock %}
